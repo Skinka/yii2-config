@@ -1,0 +1,29 @@
+{
+  "name": "skinka/yii2-config",
+  "type": "extension",
+  "description": "",
+  "keywords": [
+    "yii2",
+    "config"
+  ],
+  "homepage": "http://github.com/skinka/yii2-config",
+  "license": "MIT",
+  "support": {
+    "issues": "https://github.com/skinka/yii2-config/issues",
+    "source": "https://github.com/skinka/yii2-config"
+  },
+  "authors": [
+    {
+      "name": "Skinka",
+      "email": "skink@yandex.ru"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "skinka\\yii2\\extension\\config\\": "src"
+    }
+  }
+}
