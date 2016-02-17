@@ -15,7 +15,6 @@ class m151206_181613_config extends Migration
             'alias' => $this->string(150)->notNull(),
             'type' => $this->smallInteger(1)->notNull(),
             'value' => $this->string()->notNull(),
-            'default' => $this->string()->notNull(),
             'valid_rules' => $this->text()->defaultValue(null),
             'variants' => $this->text()->defaultValue(null),
             'sort' => $this->integer()->unsigned()->notNull()->defaultValue(0),

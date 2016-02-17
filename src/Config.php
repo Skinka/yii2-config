@@ -18,7 +18,7 @@ class Config extends Component
     const TYPE_BOOLEAN = 3;
 
     public static $cachePrefix = 'config_';
-    private static $_instance;
+    protected static $_instance;
 
     public static function __callStatic($name, $arguments)
     {
@@ -29,20 +29,19 @@ class Config extends Component
             $model = static::getInstance($name)->getAttributes();
             \Yii::$app->cache->set(static::$cachePrefix . $name, $model);
         }
-        $data = empty($model['value']) ? $model['default'] : $model['value'];
 
         switch ($model['type']) {
             case self::TYPE_STRING:
-                return (string)$data;
+                return (string)$model['value'];
                 break;
             case self::TYPE_INTEGER:
-                return (int)$data;
+                return (int)$model['value'];
                 break;
             case self::TYPE_FLOAT:
-                return (float)$data;
+                return (float)$model['value'];
                 break;
             case self::TYPE_BOOLEAN:
-                return (boolean)$data;
+                return (boolean)$model['value'];
                 break;
         }
         throw new InvalidConfigException();
@@ -52,10 +51,10 @@ class Config extends Component
     {
         if (!isset(static::$_instance[$name])) {
             $data = ConfigModel::find()->where(['name' => $name])->one();
-            if ($data) {
-                static::$_instance[$name] = $data;
+            if (!$data) {
+                throw new \BadMethodCallException();
             }
-            throw new \BadMethodCallException();
+            static::$_instance[$name] = $data;
         }
         return static::$_instance[$name];
     }
@@ -63,9 +62,8 @@ class Config extends Component
     public static function setNew(
         $name,
         $alias,
-        $default,
+        $value,
         $type = self::TYPE_STRING,
-        $value = '',
         $valid_rules = '',
         $variants = '',
         $sort = 0
@@ -78,8 +76,7 @@ class Config extends Component
             $model->valid_rules = json_encode($valid_rules);
             //@TODO валидация $default и $value
         }
-        $model->default = $default;
-        $model->value = $value;
+        $model->value = (string)$value;
 
         if (is_array($variants)) {
             $model->variants = $variants;

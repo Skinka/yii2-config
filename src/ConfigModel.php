@@ -11,7 +11,6 @@ use Yii;
  * @property string $alias
  * @property integer $type
  * @property string $value
- * @property string $default
  * @property string $valid_rules
  * @property string $variants
  * @property integer $sort
@@ -33,7 +32,7 @@ class ConfigModel extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'alias', 'type', 'value', 'default', 'sort'], 'required'],
+            [['name', 'alias', 'type', 'value', 'sort'], 'required'],
             [['name'], 'unique'],
             [['name'], 'trim'],
             [['name'], 'match', 'pattern' => '/^[a-z]\w*$/i'],
@@ -46,7 +45,7 @@ class ConfigModel extends \yii\db\ActiveRecord
             [['variants', 'valid_rules'], 'string'],
             [['name'], 'string', 'max' => 50],
             [['alias'], 'string', 'max' => 150],
-            [['value', 'default'], 'string', 'max' => 255]
+            [['value'], 'string', 'max' => 255]
         ];
     }
 
@@ -61,7 +60,6 @@ class ConfigModel extends \yii\db\ActiveRecord
             'alias' => Yii::t('app', 'Alias'),
             'type' => Yii::t('app', 'Type'),
             'value' => Yii::t('app', 'Value'),
-            'default' => Yii::t('app', 'Default Value'),
             'variants' => Yii::t('app', 'Variants'),
             'sort' => Yii::t('app', 'sort'),
         ];
