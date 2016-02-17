@@ -6,28 +6,103 @@ namespace skinka\yii2\extension\config;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 
+/**
+ * Class Config
+ * @package skinka\yii2\extension\config
+ */
 class Config extends Component
 {
+    public static $cachePrefix = 'config_';
+    private static $_instance;
+
     public static function __callStatic($name, $arguments)
     {
-        /** @var ConfigModel $data */
-        $data = ConfigModel::getData($name);
-        if ($data) {
-            switch ($data->type) {
-                case ConfigModel::TYPE_STRING:
-                    return (string)empty($data->value) ? $data->default : $data->value;
-                    break;
-                case ConfigModel::TYPE_INTEGER:
-                    return (int)empty($data->value) ? $data->default : $data->value;
-                    break;
-                case ConfigModel::TYPE_FLOAT:
-                    return (float)empty($data->value) ? $data->default : $data->value;
-                    break;
-                case ConfigModel::TYPE_BOOLEAN:
-                    return (boolean)empty($data->value) ? $data->default : $data->value;
-                    break;
-            }
+        /** @var ConfigModel $model */
+        if (\Yii::$app->cache->exists(static::$cachePrefix . $name)) {
+            $model = \Yii::$app->cache->get(static::$cachePrefix . $name);
+        } else {
+            $model = static::getInstance($name)->getAttributes();
+            \Yii::$app->cache->set(static::$cachePrefix . $name, $model);
+        }
+        $data = empty($model['value']) ? $model['default'] : $model['value'];
+
+        switch ($model['type']) {
+            case ConfigModel::TYPE_STRING:
+                return (string)$data;
+                break;
+            case ConfigModel::TYPE_INTEGER:
+                return (int)$data;
+                break;
+            case ConfigModel::TYPE_FLOAT:
+                return (float)$data;
+                break;
+            case ConfigModel::TYPE_BOOLEAN:
+                return (boolean)$data;
+                break;
         }
         throw new InvalidConfigException();
+    }
+
+    private static function getInstance($name)
+    {
+        if (!isset(static::$_instance[$name])) {
+            $data = ConfigModel::find()->where(['name' => $name])->one();
+            if ($data) {
+                static::$_instance[$name] = $data;
+            }
+            throw new \BadMethodCallException();
+        }
+        return static::$_instance[$name];
+    }
+
+    public static function setNew(
+        $name,
+        $alias,
+        $default,
+        $type = ConfigModel::TYPE_STRING,
+        $value = '',
+        $valid_rules = '',
+        $variants = '',
+        $sort = 0
+    ) {
+        $model = new ConfigModel();
+        $model->name = $name;
+        $model->alias = $alias;
+        $model->type = $type;
+        if (is_array($valid_rules)) {
+            $model->valid_rules = json_encode($valid_rules);
+            //@TODO валидация $default и $value
+        }
+        $model->default = $default;
+        $model->value = $value;
+
+        if (is_array($variants)) {
+            $model->variants = $variants;
+        }
+        $model->sort = $sort;
+        if (!$model->save()) {
+            return $model->getErrors();
+        }
+        return true;
+    }
+
+    public static function setValue($name, $newValue)
+    {
+        /** @var ConfigModel $model */
+        $model = static::getInstance($name);
+        //@TODO если $valid_rules заполнен то нужно перевалидировать
+        $model->value = (string)$newValue;
+        static::clearCache($name);
+        return $model->save();
+    }
+
+    private static function clearCache($name)
+    {
+        \Yii::$app->cache->delete(static::$cachePrefix . $name);
+    }
+
+    public static function delete($name)
+    {
+        return \Yii::$app->cache->delete(static::$cachePrefix . $name) && ConfigModel::deleteAll(['name' => $name]) > 0;
     }
 }

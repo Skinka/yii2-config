@@ -11,15 +11,16 @@ class m151206_181613_config extends Migration
             $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB';
         }
         $this->createTable('{{%config}}', [
-            'id' => $this->primaryKey(),
-            'name' => $this->string(50)->notNull(),
+            'name' => $this->string(100)->notNull()->unique(),
             'alias' => $this->string(150)->notNull(),
             'type' => $this->smallInteger(1)->notNull(),
             'value' => $this->string()->notNull(),
             'default' => $this->string()->notNull(),
-            'variants' => $this->text()->defaultValue(null)
+            'valid_rules' => $this->text()->defaultValue(null),
+            'variants' => $this->text()->defaultValue(null),
+            'sort' => $this->integer()->unsigned()->notNull()->defaultValue(0),
         ], $tableOptions);
-        $this->createIndex('idx_config_name', '{{%config}}', 'name');
+        $this->createIndex('idx_config_name', '{{%config}}', 'name', true);
     }
 
     public function down()
