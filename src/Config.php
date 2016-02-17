@@ -12,6 +12,11 @@ use yii\base\InvalidConfigException;
  */
 class Config extends Component
 {
+    const TYPE_STRING = 0;
+    const TYPE_INTEGER = 1;
+    const TYPE_FLOAT = 2;
+    const TYPE_BOOLEAN = 3;
+
     public static $cachePrefix = 'config_';
     private static $_instance;
 
@@ -27,16 +32,16 @@ class Config extends Component
         $data = empty($model['value']) ? $model['default'] : $model['value'];
 
         switch ($model['type']) {
-            case ConfigModel::TYPE_STRING:
+            case self::TYPE_STRING:
                 return (string)$data;
                 break;
-            case ConfigModel::TYPE_INTEGER:
+            case self::TYPE_INTEGER:
                 return (int)$data;
                 break;
-            case ConfigModel::TYPE_FLOAT:
+            case self::TYPE_FLOAT:
                 return (float)$data;
                 break;
-            case ConfigModel::TYPE_BOOLEAN:
+            case self::TYPE_BOOLEAN:
                 return (boolean)$data;
                 break;
         }
@@ -59,7 +64,7 @@ class Config extends Component
         $name,
         $alias,
         $default,
-        $type = ConfigModel::TYPE_STRING,
+        $type = self::TYPE_STRING,
         $value = '',
         $valid_rules = '',
         $variants = '',

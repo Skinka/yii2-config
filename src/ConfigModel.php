@@ -18,10 +18,6 @@ use Yii;
  */
 class ConfigModel extends \yii\db\ActiveRecord
 {
-    const TYPE_STRING = 0;
-    const TYPE_INTEGER = 1;
-    const TYPE_FLOAT = 2;
-    const TYPE_BOOLEAN = 3;
 
     /**
      * @inheritdoc
@@ -42,7 +38,11 @@ class ConfigModel extends \yii\db\ActiveRecord
             [['name'], 'trim'],
             [['name'], 'match', 'pattern' => '/^[a-z]\w*$/i'],
             [['type', 'sort'], 'integer'],
-            [['type'], 'in', 'range' => [self::TYPE_BOOLEAN, self::TYPE_FLOAT, self::TYPE_INTEGER, self::TYPE_STRING]],
+            [
+                ['type'],
+                'in',
+                'range' => [Config::TYPE_BOOLEAN, Config::TYPE_FLOAT, Config::TYPE_INTEGER, Config::TYPE_STRING]
+            ],
             [['variants', 'valid_rules'], 'string'],
             [['name'], 'string', 'max' => 50],
             [['alias'], 'string', 'max' => 150],
