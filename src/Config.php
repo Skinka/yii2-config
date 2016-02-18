@@ -22,6 +22,11 @@ class Config extends Component
 
     public static function __callStatic($name, $arguments)
     {
+        return static::getValue($name);
+    }
+
+    public static function getValue($name)
+    {
         /** @var ConfigModel $model */
         if (\Yii::$app->cache->exists(static::$cachePrefix . $name)) {
             $model = \Yii::$app->cache->get(static::$cachePrefix . $name);
