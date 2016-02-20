@@ -97,7 +97,7 @@ class Config extends Component
     {
         /** @var ConfigModel $model */
         $model = static::getInstance($name);
-        //@TODO если $valid_rules заполнен то нужно перевалидировать
+        //@TODO если $valid_rules заполнен то нужно провалидировать
         $model->value = (string)$newValue;
         static::clearCache($name);
         return $model->save();
