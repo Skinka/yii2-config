@@ -4,7 +4,10 @@ namespace skinka\yii2\extension\config;
 
 
 use yii\base\Component;
+use yii\base\DynamicModel;
 use yii\base\InvalidConfigException;
+use yii\base\Model;
+use yii\validators\Validator;
 
 /**
  * Class Config
@@ -79,7 +82,11 @@ class Config extends Component
         $model->type = $type;
         if (is_array($valid_rules)) {
             $model->valid_rules = json_encode($valid_rules);
-            //@TODO валидация $default и $value
+            foreach ($valid_rules as $rule) {
+                $validatorName = $rule[0];
+                unset($rule[0]);
+                $model->validators[] = Validator::createValidator($validatorName, $model, 'value', $rule);
+            }
         }
         $model->value = (string)$value;
 
@@ -87,23 +94,19 @@ class Config extends Component
             $model->variants = $variants;
         }
         $model->sort = $sort;
-        if (!$model->save()) {
-            return $model->getErrors();
-        }
-        return true;
+        return $model->save() ?: $model->getErrors();
     }
 
     public static function setValue($name, $newValue)
     {
         /** @var ConfigModel $model */
         $model = static::getInstance($name);
-        //@TODO если $valid_rules заполнен то нужно провалидировать
         $model->value = (string)$newValue;
         static::clearCache($name);
-        return $model->save();
+        return $model->save() ?: $model->getErrors();
     }
 
-    private static function clearCache($name)
+    public static function clearCache($name)
     {
         \Yii::$app->cache->delete(static::$cachePrefix . $name);
     }
@@ -111,5 +114,12 @@ class Config extends Component
     public static function delete($name)
     {
         return \Yii::$app->cache->delete(static::$cachePrefix . $name) && ConfigModel::deleteAll(['name' => $name]) > 0;
+    }
+
+    private static function validateValue($validator, $value)
+    {
+        $model = new DynamicModel(['field' => $value]);
+        $model->addRule('field', $validator);
+        return $model->validate() ? true : $model->getFirstError('field');
     }
 }

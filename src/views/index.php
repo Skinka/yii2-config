@@ -7,14 +7,17 @@
 use skinka\yii2\extension\config\Config;
 
 ?>
-<?php $form = \yii\widgets\ActiveForm::begin() ?>
+<?php $form = \yii\widgets\ActiveForm::begin([
+    'enableClientScript' => false,
+    'enableClientValidation' => false,
+    'enableAjaxValidation' => false,
+    'validateOnChange' => false,
+    'validateOnBlur' => false,
+]) ?>
 <?php foreach ($models as $key => $model) : ?>
     <?php
-    $field = $form->field($model, 'value', [
-        'inputOptions' => [
-            'name' => 'ConfigModel[' . $key . '][value]',
-        ]
-    ])->label($model->alias);
+    $field = $form->field($model, 'value',
+        ['inputOptions' => ['name' => 'ConfigModel[' . $key . '][value]',]])->label($model->alias);
     switch ($model->type) {
         case Config::TYPE_BOOLEAN:
             echo $field->dropDownList([0 => 'Off', 1 => 'On'], ['class' => 'form-control']);

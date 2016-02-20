@@ -3,6 +3,8 @@
 namespace skinka\yii2\extension\config;
 
 use Yii;
+use yii\helpers\ArrayHelper;
+use yii\validators\Validator;
 
 /**
  * This is the model class for table "{{%config}}".
@@ -45,7 +47,6 @@ class ConfigModel extends \yii\db\ActiveRecord
             [['variants', 'valid_rules'], 'string'],
             [['name'], 'string', 'max' => 50],
             [['alias'], 'string', 'max' => 150],
-            [['value'], 'string', 'max' => 255]
         ];
     }
 
@@ -55,13 +56,27 @@ class ConfigModel extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'),
-            'name' => Yii::t('app', 'Name'),
-            'alias' => Yii::t('app', 'Alias'),
-            'type' => Yii::t('app', 'Type'),
-            'value' => Yii::t('app', 'Value'),
-            'variants' => Yii::t('app', 'Variants'),
-            'sort' => Yii::t('app', 'sort'),
+            'id' => 'ID',
+            'name' => 'Name',
+            'alias' => 'Alias',
+            'type' => 'Type',
+            'value' => 'Value',
+            'variants' => 'Variants',
+            'valid_rules' => 'Validators',
+            'sort' => 'Sort',
         ];
+    }
+
+    public function afterFind()
+    {
+        if (!empty($this->valid_rules) && is_array(json_decode($this->valid_rules))) {
+            foreach (json_decode($this->valid_rules) as $rule) {
+                $validatorName = $rule[0];
+                unset($rule[0]);
+                $this->validators[] = Validator::createValidator($validatorName, $this, 'value', $rule);
+            }
+        } else {
+            $this->validators[] = Validator::createValidator('string', $this, 'value', ['max' => 255]);
+        }
     }
 }
