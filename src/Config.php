@@ -15,6 +15,14 @@ use yii\validators\Validator;
  */
 class Config extends Component
 {
+    const INPUT_INPUT = 'textInput';
+    const INPUT_TEXT = 'textArea';
+    const INPUT_CHECKBOX = 'checkbox';
+    const INPUT_CHECKBOX_LIST = 'checkboxList';
+    const INPUT_RADIO_LIST = 'radioList';
+    const INPUT_DROPDOWN = 'dropDownList';
+    const INPUT_WIDGET = 'widget';
+
     const TYPE_STRING = 0;
     const TYPE_INTEGER = 1;
     const TYPE_FLOAT = 2;
@@ -72,17 +80,22 @@ class Config extends Component
         $alias,
         $value,
         $type = self::TYPE_STRING,
-        $valid_rules = '',
-        $variants = '',
+        $input = self::INPUT_INPUT,
+        $rules = '',
+        $options = '',
+        $hint = '',
         $sort = 0
     ) {
         $model = new ConfigModel();
         $model->name = $name;
         $model->alias = $alias;
         $model->type = $type;
-        if (is_array($valid_rules)) {
-            $model->valid_rules = json_encode($valid_rules);
-            foreach ($valid_rules as $rule) {
+        $model->input = $input;
+        $model->hint = $hint;
+        $model->sort = $sort;
+        if (is_array($rules)) {
+            $model->rules = json_encode($rules);
+            foreach ($rules as $rule) {
                 $validatorName = $rule[0];
                 unset($rule[0]);
                 $model->validators[] = Validator::createValidator($validatorName, $model, 'value', $rule);
@@ -90,10 +103,9 @@ class Config extends Component
         }
         $model->value = (string)$value;
 
-        if (is_array($variants)) {
-            $model->variants = $variants;
+        if (is_array($options)) {
+            $model->options = json_encode($options);
         }
-        $model->sort = $sort;
         return $model->save() ?: $model->getErrors();
     }
 
@@ -106,6 +118,15 @@ class Config extends Component
         return $model->save() ?: $model->getErrors();
     }
 
+    public static function setSort($name, $newPosition)
+    {
+        /** @var ConfigModel $model */
+        $model = static::getInstance($name);
+        $model->sort = $newPosition;
+        static::clearCache($name);
+        return $model->save() ?: $model->getErrors();
+    }
+
     public static function clearCache($name)
     {
         \Yii::$app->cache->delete(static::$cachePrefix . $name);
@@ -114,12 +135,5 @@ class Config extends Component
     public static function delete($name)
     {
         return \Yii::$app->cache->delete(static::$cachePrefix . $name) && ConfigModel::deleteAll(['name' => $name]) > 0;
-    }
-
-    private static function validateValue($validator, $value)
-    {
-        $model = new DynamicModel(['field' => $value]);
-        $model->addRule('field', $validator);
-        return $model->validate() ? true : $model->getFirstError('field');
     }
 }

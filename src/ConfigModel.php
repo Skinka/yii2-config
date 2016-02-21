@@ -5,6 +5,8 @@ namespace skinka\yii2\extension\config;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\validators\Validator;
+use yii\widgets\ActiveField;
+use yii\widgets\ActiveForm;
 
 /**
  * This is the model class for table "{{%config}}".
@@ -12,9 +14,11 @@ use yii\validators\Validator;
  * @property string $name
  * @property string $alias
  * @property integer $type
+ * @property string $input
  * @property string $value
- * @property string $valid_rules
- * @property string $variants
+ * @property string $rules
+ * @property string $options
+ * @property string $hint
  * @property integer $sort
  */
 class ConfigModel extends \yii\db\ActiveRecord
@@ -34,7 +38,7 @@ class ConfigModel extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'alias', 'type', 'value', 'sort'], 'required'],
+            [['name', 'alias', 'type', 'value', 'sort', 'input'], 'required'],
             [['name'], 'unique'],
             [['name'], 'trim'],
             [['name'], 'match', 'pattern' => '/^[a-z]\w*$/i'],
@@ -44,7 +48,20 @@ class ConfigModel extends \yii\db\ActiveRecord
                 'in',
                 'range' => [Config::TYPE_BOOLEAN, Config::TYPE_FLOAT, Config::TYPE_INTEGER, Config::TYPE_STRING]
             ],
-            [['variants', 'valid_rules'], 'string'],
+            [
+                ['input'],
+                'in',
+                'range' => [
+                    Config::INPUT_INPUT,
+                    Config::INPUT_CHECKBOX,
+                    Config::INPUT_CHECKBOX_LIST,
+                    Config::INPUT_DROPDOWN,
+                    Config::INPUT_RADIO_LIST,
+                    Config::INPUT_TEXT,
+                    Config::INPUT_WIDGET
+                ]
+            ],
+            [['options', 'rules', 'hint', 'input'], 'string'],
             [['name'], 'string', 'max' => 50],
             [['alias'], 'string', 'max' => 150],
         ];
@@ -61,22 +78,39 @@ class ConfigModel extends \yii\db\ActiveRecord
             'alias' => 'Alias',
             'type' => 'Type',
             'value' => 'Value',
-            'variants' => 'Variants',
-            'valid_rules' => 'Validators',
+            'input' => 'Input',
+            'options' => 'Options',
+            'rules' => 'Validators',
+            'hint' => 'Hint',
             'sort' => 'Sort',
         ];
     }
 
     public function afterFind()
     {
-        if (!empty($this->valid_rules) && is_array(json_decode($this->valid_rules))) {
-            foreach (json_decode($this->valid_rules) as $rule) {
+        if (!empty($this->rules) && is_array(json_decode($this->rules, true))) {
+            foreach (json_decode($this->rules) as $rule) {
                 $validatorName = $rule[0];
                 unset($rule[0]);
                 $this->validators[] = Validator::createValidator($validatorName, $this, 'value', $rule);
             }
         } else {
-            $this->validators[] = Validator::createValidator('string', $this, 'value', ['max' => 255]);
+            $this->validators[] = Validator::createValidator('string', $this, 'value', []);
         }
+    }
+
+    public function getConfigInput($form, $options = [], $inputOptions = [])
+    {
+        /** @var ActiveField $input */
+        /** @var ActiveForm $form */
+        $field = 'value';
+        $input = $form->field($this, "[{$this->name}]{$field}", $options);
+        $input = call_user_func_array([$input, $this->input],
+            ['options' => ArrayHelper::merge(json_decode($this->options, true), $inputOptions)]);
+        $input = $input->label($this->alias);
+        if (!empty($this->hint)) {
+            $input = $input->hint($this->hint);
+        }
+        return $input;
     }
 }
