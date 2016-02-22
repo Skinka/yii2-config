@@ -86,6 +86,9 @@ class ConfigModel extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @inheritdoc
+     */
     public function afterFind()
     {
         if (!empty($this->rules) && is_array(json_decode($this->rules, true))) {

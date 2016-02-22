@@ -1,10 +1,13 @@
 {
   "name": "skinka/yii2-config",
   "type": "extension",
-  "description": "",
+  "description": "Extension for Yii2 to dynamically configuration parameters stored in the database",
   "keywords": [
     "yii2",
-    "config"
+    "config",
+    "stored database",
+    "dynamically configuration parameters",
+    "dynamically parameters"
   ],
   "homepage": "http://github.com/skinka/yii2-config",
   "license": "MIT",

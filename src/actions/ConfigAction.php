@@ -13,6 +13,10 @@ class ConfigAction extends Action
 {
     public $viewPath = '@vendor/skinka/yii2-config/src/views/index';
     public $successMessage = 'Saved';
+
+    /**
+     * @return array|string|Response
+     */
     public function run()
     {
         $models = ConfigModel::find()->orderBy(['sort' => SORT_ASC])->indexBy('name')->all();
