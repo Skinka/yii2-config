@@ -2,10 +2,26 @@
 This is extension allow storing configuration parameters of application in database and management they dynamically from admin panel.
 
 ## Install
-Add `skinka/yii2-config` to the project's composer.json dependencies and run php composer.phar install
+The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
+
+Either run
+
+```
+php composer.phar require --prefer-dist skinka/yii2-config "*"
+```
+
+or add
+
+```
+"skinka/yii2-config": "*"
+```
+
+to the require section of your `composer.json` file.
+
 
 # Usage
 Before you can go on you need to create those tables in the database. To do this, you can use the migration stored in `@vendor/skinka/yii2-config/src/migrations`:
+
 `yii migrate --migrationPath=@vendor/skinka/yii2-config/src/migrations`
 
 after create the migration to the new dynamic parameters
