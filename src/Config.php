@@ -203,8 +203,10 @@ class Config extends Component
         }
         $model->value = (string)$value;
 
-        if (is_array($options) && !empty($options)) {
+        if (is_array($options)) {
             $model->options = json_encode($options);
+        } else {
+            $model->options = json_encode([]);
         }
         return $model->save() ?: $model->getErrors();
     }
