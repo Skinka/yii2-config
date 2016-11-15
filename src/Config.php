@@ -257,6 +257,7 @@ class Config extends Component
      */
     public static function delete($name)
     {
-        return \Yii::$app->cache->delete(static::$cachePrefix . $name) && ConfigModel::deleteAll(['name' => $name]) > 0;
+        \Yii::$app->cache->delete(static::$cachePrefix . $name);
+        return ConfigModel::deleteAll(['name' => $name]) > 0;
     }
 }
