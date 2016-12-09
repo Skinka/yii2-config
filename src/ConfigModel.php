@@ -38,7 +38,7 @@ class ConfigModel extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'alias', 'type', 'value', 'sort', 'input'], 'required'],
+            [['name', 'alias', 'type', 'sort', 'input'], 'required'],
             [['name'], 'unique'],
             [['name'], 'trim'],
             [['name'], 'match', 'pattern' => '/^[a-z]\w*$/i'],
@@ -61,7 +61,7 @@ class ConfigModel extends \yii\db\ActiveRecord
                     Config::INPUT_WIDGET
                 ]
             ],
-            [['options', 'rules', 'hint', 'input'], 'string'],
+            [['options', 'value', 'rules', 'hint', 'input'], 'string'],
             [['name'], 'string', 'max' => 50],
             [['alias'], 'string', 'max' => 150],
         ];
